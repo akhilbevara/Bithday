@@ -291,7 +291,26 @@ Happy Birthday once again! 🎂🥂.</p>
 
         function initPhotoStack() {
             const stack = document.getElementById('photo-stack'); stack.style.display = 'block'; setTimeout(() => stack.style.opacity = '1', 50);
-            const photos = [{ url: 'https://picsum.photos/id/1011/300/400', label: 'Memories' }, { url: 'https://picsum.photos/id/1012/300/400', label: 'Dreams' }, { url: 'https://picsum.photos/id/1014/300/400', label: 'Birthday Boy!' }];
+            const photos = [{ 
+        url: 'https://raw.githubusercontent.com/akhilbevara/Bithday/main/photos/1.jpg', 
+        label: 'Memories' 
+    },
+    { 
+        url: 'https://raw.githubusercontent.com/akhilbevara/Bithday/main/photos/2.jpg', 
+        label: 'Dreams' 
+    },
+    { 
+        url: 'https://raw.githubusercontent.com/akhilbevara/Bithday/main/photos/WhatsApp%20Image%202026-03-17%20at%201.30.08%20AM.jpeg', 
+        label: 'The Legend' 
+    },
+    { 
+        url: 'https://raw.githubusercontent.com/akhilbevara/Bithday/main/photos/WhatsApp%20Image%202026-03-17%20at%201.30.09%20AM.jpeg', 
+        label: 'Brotherhood' 
+    },
+    { 
+        url: 'https://raw.githubusercontent.com/akhilbevara/Bithday/main/photos/WhatsApp%20Image%202026-03-17%20at%201.31.49%20AM.jpeg', 
+        label: 'Birthday Boy!' 
+    }];
             let swiped = 0;
             photos.forEach((p, i) => {
                 const card = document.createElement('div'); card.className = 'card'; card.style.zIndex = photos.length - i;
