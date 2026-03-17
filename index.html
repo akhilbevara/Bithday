@@ -13,6 +13,18 @@
             font-family: 'Arial Black', sans-serif; transition: background-color 1.5s ease;
         }
 
+        /* --- COUNTDOWN OVERLAY --- */
+        #countdown-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 9999; display: flex;
+            flex-direction: column; justify-content: center; align-items: center;
+            color: white; text-align: center;
+        }
+        #timer { font-size: 3.5rem; color: #00f2ff; margin: 20px 0; font-family: 'Courier New', monospace; text-shadow: 0 0 20px #00f2ff; }
+        .lock-icon { font-size: 4rem; cursor: pointer; user-select: none; transition: transform 0.2s; }
+        .lock-icon:active { transform: scale(0.9); }
+        #test-mode-hint { font-size: 0.7rem; color: #222; margin-top: 50px; }
+
         /* --- STAGE 1: LIGHT SWITCH --- */
         #light-switch {
             padding: 20px 40px; font-size: 1.2rem; color: #fff; background: none;
@@ -126,7 +138,15 @@
 </head>
 <body>
 
-    <button id="light-switch" onclick="revealSurprise()">CLICK HERE TO LIGHT UP</button>
+    <div id="countdown-overlay">
+        <div class="lock-icon" onclick="testModeTrigger()">🔒</div>
+        <h2 id="countdown-header">THE SURPRISE UNLOCKS IN...</h2>
+        <div id="timer">00:00:00:00</div>
+        <p>Patience, Legend. Good things take time.</p>
+        <div id="test-mode-hint">Secret: Tap Lock 5 times</div>
+    </div>
+
+    <button id="light-switch" onclick="revealSurprise()" style="display:none;">CLICK HERE TO LIGHT UP</button>
 
     <div class="led-container" id="leds"><div class="led"></div><div class="led"></div><div class="led"></div><div class="led"></div><div class="led"></div><div class="led"></div><div class="led"></div><div class="led"></div><div class="led"></div></div>
 
@@ -188,21 +208,19 @@
             <br>
             <p>Happy Birthday, Legend!</p>
             <p>I just wanted to take a moment to tell you how much you mean to me. Growing up with you has given me so many memories that I’ll always cherish. You’ve always been the fun one — the guy who can crack a joke in any situation and make everyone around you laugh. Honestly, half the time I think our family survives tough moments because of your humor.
-
-I really admire the courage you’ve shown by trying to build a career in a new country. It’s not easy to step out of your comfort zone and chase something bigger, but that’s exactly what you’re doing. It takes strength, patience, and a lot of determination, and I’m proud of you for that.
-
-I’m also grateful for everything you’ve done for our family, especially being there at home with mom and dad when I couldn’t be. Knowing you’re there looking out for them gives me a lot of peace of mind. It means more than I probably say.
-
-Some of my favorite memories are the simple ones — the times we sit together, share a few drinks, talk about life, argue about random things, and laugh like idiots. Those moments remind me how lucky I am to have you not just as a brother, but as a friend.
-
-And let’s be honest — you’re definitely the better sport between the two of us. I’ll admit that publicly at least once a year on your birthday. 😄
-
-I hope this year brings you success, happiness, good health, and many more reasons to laugh. No matter where life takes us, you’ll always be my brother and one of my favorite people to spend time with.More drinks, more jokes, and more memories waiting for us.
-
-Enjoy your day, celebrate big.
-
-Happy Birthday once again! 🎂🥂.</p>
-                       <br>
+            <br><br>
+            I really admire the courage you’ve shown by trying to build a career in a new country. It’s not easy to step out of your comfort zone and chase something bigger, but that’s exactly what you’re doing. It takes strength, patience, and a lot of determination, and I’m proud of you for that.
+            <br><br>
+            I’m also grateful for everything you’ve done for our family, especially being there at home with mom and dad when I couldn’t be. Knowing you’re there looking out for them gives me a lot of peace of mind. It means more than I probably say.
+            <br><br>
+            Some of my favorite memories are the simple ones — the times we sit together, share a few drinks, talk about life, argue about random things, and laugh like idiots. Those moments remind me how lucky I am to have you not just as a brother, but as a friend.
+            <br><br>
+            I hope this year brings you success, happiness, good health, and many more reasons to laugh. No matter where life takes us, you’ll always be my brother and one of my favorite people to spend time with.
+            <br><br>
+            Enjoy your day, celebrate big.
+            <br><br>
+            Happy Birthday once again! 🎂🥂.</p>
+            <br>
             <p style="font-style: italic;">With love, <br> Your Brother</p>
             <button class="big-btn" style="display:block; margin: 40px auto; background: #ffd700; color: #8a0c24;" onclick="location.reload()">REPLAY THE SURPRISE</button>
         </div>
@@ -216,6 +234,40 @@ Happy Birthday once again! 🎂🥂.</p>
     <audio id="sealSound" preload="auto"><source src="https://assets.mixkit.co/active_storage/sfx/1101/1101-preview.mp3" type="audio/mpeg"></audio>
     
     <script>
+        /* --- COUNTDOWN LOGIC --- */
+        let testClicks = 0;
+        function updateCountdown() {
+            const now = new Date().toLocaleString("en-US", {timeZone: "America/New_York"});
+            const currentTime = new Date(now);
+            const targetDate = new Date("March 18, 2026 00:00:00");
+            const diff = targetDate - currentTime;
+
+            if (diff <= 0) {
+                document.getElementById('countdown-overlay').style.display = 'none';
+                document.getElementById('light-switch').style.display = 'block';
+                return;
+            }
+
+            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+            document.getElementById('timer').innerText = 
+                `${String(d).padStart(2, '0')}:${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        }
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+
+        function testModeTrigger() {
+            testClicks++;
+            if (testClicks >= 5) {
+                document.getElementById('countdown-overlay').style.display = 'none';
+                document.getElementById('light-switch').style.display = 'block';
+            }
+        }
+
+        /* --- GAME LOGIC --- */
         const canvas = document.getElementById('cakeCanvas');
         const ctx = canvas.getContext('2d');
         const song = document.getElementById('birthdaySong');
@@ -257,7 +309,6 @@ Happy Birthday once again! 🎂🥂.</p>
         function revealSurprise() {
             song.play();
             document.getElementById('light-switch').style.display = 'none';
-            document.body.classList.add('lights-on');
             document.getElementById('leds').style.display = 'flex';
             const banner = document.getElementById('banner-wrapper'); banner.style.display = 'flex';
             setTimeout(() => { banner.style.opacity = '1'; banner.style.transform = 'translateY(0)'; }, 100);
@@ -274,7 +325,7 @@ Happy Birthday once again! 🎂🥂.</p>
         function startBalloonSky() {
             song.pause(); song.currentTime = 0;
             document.getElementById('cake-container').style.display = 'none';
-            document.body.classList.remove('lights-on'); document.body.classList.add('sky-active');
+            document.body.classList.add('sky-active');
             for(let i=0; i < 25; i++) {
                 setTimeout(() => {
                     const b = document.createElement('div'); b.className = 'balloon';
@@ -291,29 +342,17 @@ Happy Birthday once again! 🎂🥂.</p>
 
         function initPhotoStack() {
             const stack = document.getElementById('photo-stack'); stack.style.display = 'block'; setTimeout(() => stack.style.opacity = '1', 50);
-            const photos = [{ 
-        url: 'https://raw.githubusercontent.com/akhilbevara/Bithday/main/photos/1.jpg', 
-        label: 'Memories' 
-    },
-    { 
-        url: 'https://raw.githubusercontent.com/akhilbevara/Bithday/main/photos/2.jpg', 
-        label: 'Dreams' 
-    },
-    { 
-        url: 'https://raw.githubusercontent.com/akhilbevara/Bithday/main/photos/WhatsApp%20Image%202026-03-17%20at%201.30.08%20AM.jpeg', 
-        label: 'The Legend' 
-    },
-    { 
-        url: 'https://raw.githubusercontent.com/akhilbevara/Bithday/main/photos/WhatsApp%20Image%202026-03-17%20at%201.30.09%20AM.jpeg', 
-        label: 'Brotherhood' 
-    },
-    { 
-        url: 'https://raw.githubusercontent.com/akhilbevara/Bithday/main/photos/WhatsApp%20Image%202026-03-17%20at%201.31.49%20AM.jpeg', 
-        label: 'Birthday Boy!' 
-    }];
+            const photos = [
+                { url: 'https://raw.githubusercontent.com/akhilbevara/Bithday/main/photos/1.jpg', label: 'Memories' },
+                { url: 'https://raw.githubusercontent.com/akhilbevara/Bithday/main/photos/2.jpg', label: 'Dreams' },
+                { url: 'https://raw.githubusercontent.com/akhilbevara/Bithday/main/photos/WhatsApp%20Image%202026-03-17%20at%201.30.08%20AM.jpeg', label: 'The Legend' },
+                { url: 'https://raw.githubusercontent.com/akhilbevara/Bithday/main/photos/WhatsApp%20Image%202026-03-17%20at%201.30.09%20AM.jpeg', label: 'Brotherhood' },
+                { url: 'https://raw.githubusercontent.com/akhilbevara/Bithday/main/photos/WhatsApp%20Image%202026-03-17%20at%201.31.49%20AM.jpeg', label: 'Birthday Boy!' }
+            ];
             let swiped = 0;
             photos.forEach((p, i) => {
                 const card = document.createElement('div'); card.className = 'card'; card.style.zIndex = photos.length - i;
+                card.style.transform = `rotate(${(Math.random() * 6) - 3}deg)`;
                 card.innerHTML = `<img src="${p.url}"><div class="card-label">${p.label}</div>`;
                 card.onmousedown = (e) => {
                     let startX = e.clientX;
@@ -407,8 +446,6 @@ Happy Birthday once again! 🎂🥂.</p>
                 const prizeIndex = Math.floor(((360 - (randomRotation % 360) + 270) % 360) / (360 / prizes.length));
                 document.getElementById('spin-result').innerText = `🎁 YOU WON: ${prizes[prizeIndex]}!`;
                 triggerConfetti();
-                
-                // RENAME BUTTON TO "VIEW GREETING"
                 btn.innerText = "VIEW GREETING 💌";
                 btn.disabled = false; btn.style.opacity = '1';
                 btn.style.background = "linear-gradient(45deg, #d4af37, #8a0c24)";
