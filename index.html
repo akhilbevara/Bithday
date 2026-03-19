@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Birthday Surprise for Ankith</title>
     <style>
         /* --- GLOBAL STYLES --- */
@@ -10,7 +10,9 @@
             margin: 0; padding: 0; width: 100%; height: 100%;
             background-color: #000; display: flex; flex-direction: column;
             justify-content: center; align-items: center; overflow: hidden;
-            font-family: 'Arial Black', sans-serif; transition: background-color 1.5s ease;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            transition: background-color 1.5s ease;
+            -webkit-tap-highlight-color: transparent; /* Fix for blue highlight on tap */
         }
 
         /* --- COUNTDOWN OVERLAY --- */
@@ -18,19 +20,17 @@
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #000; z-index: 9999; display: flex;
             flex-direction: column; justify-content: center; align-items: center;
-            color: white; text-align: center;
+            color: white; text-align: center; padding: 20px; box-sizing: border-box;
         }
-        #timer { font-size: 3.5rem; color: #00f2ff; margin: 20px 0; font-family: 'Courier New', monospace; text-shadow: 0 0 20px #00f2ff; }
-        .lock-icon { font-size: 4rem; cursor: pointer; user-select: none; transition: transform 0.2s; }
-        .lock-icon:active { transform: scale(0.9); }
-        #test-mode-hint { font-size: 0.7rem; color: #222; margin-top: 50px; }
+        #timer { font-size: 2.5rem; color: #00f2ff; margin: 20px 0; font-family: 'Courier New', monospace; text-shadow: 0 0 20px #00f2ff; }
+        .lock-icon { font-size: 4rem; cursor: pointer; user-select: none; }
+        #test-mode-hint { font-size: 0.7rem; color: #333; margin-top: 50px; }
 
         /* --- STAGE 1: LIGHT SWITCH --- */
         #light-switch {
             padding: 20px 40px; font-size: 1.2rem; color: #fff; background: none;
             border: 2px solid #333; cursor: pointer; border-radius: 50px; z-index: 100;
         }
-        #light-switch:hover { border-color: #fff; box-shadow: 0 0 20px #fff; }
         
         .led-container { display: none; position: absolute; top: 0; width: 100%; justify-content: space-around; padding: 10px 0; z-index: 5; }
         .led { width: 10px; height: 15px; border-radius: 50%; animation: flash 1s infinite alternate; }
@@ -40,432 +40,346 @@
         @keyframes flash { from { opacity: 0.3; } to { opacity: 1; } }
 
         /* --- STAGE 2: BANNER & CAKE --- */
-        #banner-wrapper { display: none; flex-direction: column; align-items: center; opacity: 0; transform: translateY(-100px); transition: all 1s ease; }
-        .pennant-string { display: flex; gap: 8px; }
-        .flag { width: 40px; height: 60px; background: #ff007f; display: flex; justify-content: center; align-items: center; color: white; font-size: 1.2rem; clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 50% 80%, 0% 100%); animation: sway 3s infinite alternate; transform-origin: top center; }
+        #banner-wrapper { display: none; flex-direction: column; align-items: center; opacity: 0; transform: translateY(-50px); transition: all 1s ease; }
+        .pennant-string { display: flex; gap: 5px; margin-bottom: 5px; }
+        .flag { width: 35px; height: 50px; background: #ff007f; display: flex; justify-content: center; align-items: center; color: white; font-size: 1rem; clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 50% 80%, 0% 100%); }
         .flag:nth-child(even) { background: #00f2ff; color: #333; }
-        @keyframes sway { from { transform: rotate(-3deg); } to { transform: rotate(3deg); } }
 
-        #cake-container { display: none; opacity: 0; transition: opacity 1s ease; text-align: center; position: relative; }
-        canvas#cakeCanvas { cursor: pointer; touch-action: none; filter: drop-shadow(0 0 15px rgba(255,255,255,0.1)); }
-        .instruction { color: #fff; font-size: 0.9rem; margin-top: 10px; letter-spacing: 2px; font-weight: bold; text-transform: uppercase; }
+        #cake-container { display: none; opacity: 0; transition: opacity 1s ease; text-align: center; width: 90%; }
+        canvas#cakeCanvas { cursor: pointer; touch-action: none; max-width: 100%; height: auto; }
+        .instruction { color: #fff; font-size: 0.8rem; margin-top: 10px; letter-spacing: 1px; font-weight: bold; }
         
-        #glowing-ankith { display: none; opacity: 0; margin-top: 20px; width: 100%; text-align: center; transition: opacity 1.2s ease-in-out; }
-        #glowing-ankith h1 { font-size: 2.5rem; color: #fff; margin: 0; text-shadow: 0 0 10px #fff, 0 0 20px #ff007f; animation: glowPulse 2s infinite alternate; }
-        @keyframes glowPulse { from { text-shadow: 0 0 10px #fff, 0 0 20px #ff007f; } to { text-shadow: 0 0 20px #fff, 0 0 40px #00f2ff; } }
+        #glowing-ankith { display: none; opacity: 0; margin-top: 20px; width: 100%; transition: opacity 1.2s ease; }
+        #glowing-ankith h1 { font-size: 1.8rem; color: #fff; margin: 0; text-shadow: 0 0 10px #ff007f; }
 
         .big-btn {
-            margin-top: 25px; padding: 15px 35px; font-size: 1rem; font-weight: bold;
+            margin-top: 20px; padding: 12px 25px; font-size: 0.9rem; font-weight: bold;
             color: white; background: linear-gradient(45deg, #ff007f, #00f2ff);
             border: none; border-radius: 30px; cursor: pointer;
-            box-shadow: 0 4px 15px rgba(255, 0, 127, 0.4);
-            display: none; font-family: sans-serif; transition: all 0.3s ease;
         }
 
-        /* --- STAGE 3: SKY & BALLOONS --- */
+        /* --- STAGE 3: BALLOONS --- */
         .sky-active { background: linear-gradient(to bottom, #2980b9, #6dd5fa, #ffffff) !important; }
-        .balloon { 
-            position: absolute; bottom: -150px; width: 80px; height: 100px; 
-            border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%; z-index: 10; 
-            animation: floatUp 10s linear forwards; cursor: crosshair;
-            touch-action: none;
-        }
-        .balloon::after { content: ""; position: absolute; bottom: -60px; left: 50%; width: 2px; height: 70px; background: rgba(255, 255, 255, 0.6); transform-origin: top; animation: stringSway 2s ease-in-out infinite alternate; }
-        @keyframes stringSway { from { transform: rotate(5deg); } to { transform: rotate(-5deg); } }
+        .balloon { position: absolute; bottom: -150px; width: 60px; height: 80px; border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%; animation: floatUp 10s linear forwards; touch-action: none; }
         @keyframes floatUp { 0% { transform: translateY(0); } 100% { transform: translateY(-140vh); } }
 
-        /* --- STAGE 4: PHOTO SLIDER & TAX --- */
+        /* --- STAGE 4: TAX & PHOTO STACK --- */
         #brother-invoice {
-            background: #fff; color: #111; padding: 20px; width: 280px;
-            font-family: 'Courier New', Courier, monospace; box-shadow: 5px 10px 30px rgba(0,0,0,0.4);
-            margin: 20px auto; transform: rotate(-2deg); border-top: 10px solid #222;
-            display: none; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 4000;
+            background: #fff; color: #111; padding: 20px; width: 260px;
+            font-family: 'Courier New', Courier, monospace; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            margin: 20px auto; transform: rotate(-2deg); border-top: 8px solid #222;
+            display: none; z-index: 4000;
         }
-        @keyframes popIn { from { transform: scale(0) rotate(10deg); opacity: 0; } to { transform: scale(1) rotate(-2deg); opacity: 1; } }
-        .receipt-line { display: flex; justify-content: space-between; margin-bottom: 5px; border-bottom: 1px dotted #888; font-size: 0.8rem; }
-        .receipt-total { border-top: 2px dashed #000; margin-top: 10px; font-weight: bold; font-size: 1.1rem; padding-top: 5px; }
+        .receipt-line { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.75rem; }
 
-        #photo-stack { position: relative; width: 280px; height: 380px; display: none; opacity: 0; transition: opacity 1s; z-index: 2000; }
-        .card { position: absolute; width: 100%; height: 100%; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3); cursor: grab; background: white; border: 5px solid white; transition: transform 0.5s, opacity 0.5s; }
+        #photo-stack { position: relative; width: 260px; height: 340px; display: none; opacity: 0; transition: opacity 1s; z-index: 2000; }
+        .card { position: absolute; width: 100%; height: 100%; border-radius: 15px; overflow: hidden; background: white; border: 4px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.2); touch-action: none; }
         .card img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
-        .card-label { position: absolute; bottom: 20px; left: 20px; color: white; font-family: sans-serif; font-size: 1.1rem; text-shadow: 2px 2px 5px rgba(0,0,0,0.8); }
 
         /* --- STAGE 5: HUNT & FINAL --- */
-        #hunt-container {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); z-index: 3000; flex-direction: column;
-            justify-content: center; align-items: center; color: white; text-align: center;
-        }
-        #hunt-box { background: #222; padding: 30px; border-radius: 20px; border: 2px solid #ff007f; max-width: 500px; width: 90%; position: relative; }
-        #hunt-input { padding: 12px; width: 80%; margin-top: 10px; border-radius: 8px; border: none; font-size: 1.1rem; text-align: center; background: #333; color: white; }
-        
-        #final-section { display: none; flex-direction: column; align-items: center; animation: pop 0.6s forwards; z-index: 3005; }
-        #wheel-container { position: relative; width: 280px; height: 280px; margin-top: 20px; border: 5px solid #fff; border-radius: 50%; box-shadow: 0 0 20px #00f2ff; overflow: hidden; }
-        #wheel { width: 100%; height: 100%; transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1); }
-        #wheel-pointer { position: absolute; top: -5px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 30px solid #fff; z-index: 40; }
-        
-        #debt-warning { color: #ff4757; font-size: 0.9rem; margin-top: 10px; display: none; font-weight: bold; }
+        #hunt-container { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 3000; flex-direction: column; justify-content: center; align-items: center; color: white; }
+        #hunt-box { background: #222; padding: 20px; border-radius: 15px; border: 2px solid #ff007f; width: 85%; max-width: 400px; text-align: center; }
+        #hunt-input { padding: 12px; width: 80%; margin-top: 10px; border-radius: 8px; border: none; font-size: 1rem; text-align: center; }
 
-        /* --- STAGE 6: VINTAGE LETTER --- */
-        #letter-stage {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            justify-content: center; align-items: center; background: #000; z-index: 6000; flex-direction: column;
-        }
-        #envelope-sealed {
-            position: relative; width: 300px; height: 180px; background: #fdfaf0;
-            border: 2px solid #d4af37; border-radius: 5px; box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-            cursor: pointer; transition: transform 0.8s ease; display: flex; justify-content: center; align-items: center;
-        }
-        #wax-seal {
-            width: 70px; height: 70px; background: radial-gradient(circle, #b01c3a, #8a0c24);
-            border-radius: 50%; box-shadow: inset 0 -4px 6px rgba(0,0,0,0.4), 0 4px 10px rgba(0,0,0,0.5);
-            display: flex; justify-content: center; align-items: center; color: #ffd700;
-            font-family: 'Georgia', serif; font-size: 2.5rem; font-weight: bold;
-        }
+        #final-section { display: none; flex-direction: column; align-items: center; z-index: 3005; }
+        #wheel-container { position: relative; width: 250px; height: 250px; margin-top: 10px; border: 4px solid #fff; border-radius: 50%; overflow: hidden; }
+        #wheel { width: 100%; height: 100%; transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1); }
+
+        /* --- STAGE 6: LETTER --- */
+        #letter-stage { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; justify-content: center; align-items: center; background: #000; z-index: 6000; }
         #letter-open-container {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #8a0c24; border: 15px solid #d4af37; box-sizing: border-box;
-            padding: 40px; color: #ffd700; font-family: 'Georgia', serif; overflow-y: auto; z-index: 7000;
+            background: #8a0c24; box-sizing: border-box; padding: 25px; color: #ffd700; overflow-y: auto; z-index: 7000;
         }
-        #letter-open-container h2 { text-align: center; text-transform: uppercase; border-bottom: 2px solid #ffd700; padding-bottom: 10px; }
-        #letter-open-container p { font-size: 1.2rem; line-height: 1.6; text-align: center; }
-
-        @keyframes pop { from { transform: scale(0); } to { transform: scale(1); } }
-        .confetti-piece { position: absolute; width: 10px; height: 10px; top: -20px; opacity: 0; animation: fall-down 3s linear forwards; z-index: 5000; }
-        @keyframes fall-down { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
     </style>
 </head>
 <body>
 
     <div id="countdown-overlay">
-        <div class="lock-icon" onclick="testModeTrigger()">🔒</div>
+        <div class="lock-icon" id="lock-btn">🔒</div>
         <h2 id="countdown-header">THE SURPRISE UNLOCKS IN...</h2>
         <div id="timer">00:00:00:00</div>
         <p>Patience, Legend. Good things take time.</p>
-        <div id="test-mode-hint">Secret: you cannot open</div>
+        <div id="test-mode-hint">Secret: Tap the lock 5 times</div>
     </div>
 
-    <button id="light-switch" onclick="revealSurprise()" style="display:none;">CLICK HERE TO LIGHT UP</button>
+    <button id="light-switch" style="display:none;">CLICK TO START THE MAGIC</button>
 
-    <div class="led-container" id="leds"><div class="led"></div><div class="led"></div><div class="led"></div><div class="led"></div><div class="led"></div><div class="led"></div><div class="led"></div><div class="led"></div><div class="led"></div></div>
+    <div class="led-container" id="leds">
+        </div>
 
     <div id="banner-wrapper">
         <div class="pennant-string"><div class="flag">H</div><div class="flag">A</div><div class="flag">P</div><div class="flag">P</div><div class="flag">Y</div></div>
-        <div class="pennant-string" style="margin-top: 10px;"><div class="flag">B</div><div class="flag">I</div><div class="flag">R</div><div class="flag">T</div><div class="flag">H</div><div class="flag">D</div><div class="flag">A</div><div class="flag">Y</div></div>
+        <div class="pennant-string"><div class="flag">B</div><div class="flag">I</div><div class="flag">R</div><div class="flag">T</div><div class="flag">H</div><div class="flag">D</div><div class="flag">A</div><div class="flag">Y</div></div>
     </div>
 
     <div id="cake-container">
         <canvas id="cakeCanvas" width="400" height="320"></canvas>
-        <div id="hint" class="instruction">CLICK THE CANDLE TO LIGHT IT</div>
+        <div id="hint" class="instruction">TAP THE CANDLE TO LIGHT IT</div>
         <div id="glowing-ankith">
             <h1>Happy Birthday Ankith</h1>
-            <button id="nav-button" class="big-btn" onclick="startBalloonSky()">RELEASE THE BALLOONS! 🎈</button>
+            <button id="nav-button" class="big-btn">RELEASE BALLOONS! 🎈</button>
         </div>
     </div>
 
     <div id="photo-stack"></div>
 
     <div id="brother-invoice">
-        <h3 style="text-align:center; margin:0; letter-spacing: 2px;">BROTHERHOOD TAX</h3>
-        <p style="font-size: 0.6rem; text-align:center; margin-bottom:10px;">INVOICE NO: 08-BIRTHDAY-24</p>
-        <div class="receipt-line"><span>2 AM Door Security Duty</span><span>$500.00</span></div>
-        <div class="receipt-line"><span>Drunk Bed-Sharing Surcharge</span><span>$750.00</span></div>
-        <div class="receipt-line"><span>Emotional Support (For Me)</span><span>$1.00</span></div>
-        <div class="receipt-total"><span>TOTAL DUE:</span><span>1 BIG TREAT</span></div>
-        <button id="stamp-btn" onclick="settleDebt()" style="width:100%; margin-top:15px; background:#e74c3c; color:white; border:none; padding:8px; cursor:pointer; font-weight:bold;">STAMP AS PAID</button>
-        <button id="return-to-wheel-btn" onclick="returnToWheel()" style="width:100%; margin-top:10px; background:#2980b9; color:white; border:none; padding:8px; cursor:pointer; font-weight:bold; display:none;">RETURN TO WHEEL 🎡</button>
+        <h3 style="text-align:center; margin:0;">BROTHERHOOD TAX</h3>
+        <p style="font-size: 0.5rem; text-align:center;">INVOICE NO: 08-BDAY-2026</p>
+        <div class="receipt-line"><span>2 AM Security Duty</span><span>$500.00</span></div>
+        <div class="receipt-line"><span>Drunk Support</span><span>$750.00</span></div>
+        <div class="receipt-total" style="border-top:1px dashed #000; margin-top:10px; font-weight:bold;"><span>TOTAL:</span><span>1 BIG TREAT</span></div>
+        <button id="stamp-btn" style="width:100%; margin-top:15px; background:#e74c3c; color:white; border:none; padding:10px; border-radius:5px;">STAMP AS PAID</button>
     </div>
 
-    <button id="start-hunt-btn" class="big-btn" onclick="openHunt()" style="z-index: 2500;">START SCAVENGER HUNT 🔍</button>
+    <button id="start-hunt-btn" class="big-btn" style="display:none; position:relative; z-index:2500;">START SCAVENGER HUNT 🔍</button>
 
     <div id="hunt-container">
         <div id="hunt-box">
-            <h2 id="hunt-title" style="color: #00f2ff;">Riddle #1</h2>
+            <h2 id="hunt-title" style="color: #00f2ff; margin-top:0;">Riddle #1</h2>
             <p id="hunt-riddle"></p>
-            <input type="text" id="hunt-input" placeholder="Your answer..." autocomplete="off">
-            <button class="big-btn" style="display:block; margin: 20px auto;" onclick="checkAnswer()">SUBMIT</button>
+            <input type="text" id="hunt-input" placeholder="Your answer...">
+            <button class="big-btn" id="hunt-submit">SUBMIT</button>
         </div>
         <div id="final-section">
-            <h1 style="font-size: 2.5rem; margin-bottom: 5px; color: white;">Well done Buddy!</h1>
+            <h2 style="margin: 0 0 10px 0;">Well done Buddy!</h2>
             <div id="wheel-container">
-                <div id="wheel-pointer"></div>
                 <canvas id="wheel" width="300" height="300"></canvas>
             </div>
-            <div id="debt-warning">⚠️ ACCESS DENIED: UNPAID BROTHER TAX DETECTED. ⚠️</div>
-            <button id="spin-btn" class="big-btn" onclick="spinWheel()" style="display:block;">SPIN FOR A GIFT! 🎡</button>
-            <button id="go-back-tax-btn" class="big-btn" onclick="goToTaxFromWheel()" style="background: #e67e22; margin-top:10px;">GO PAY TAX FIRST 💳</button>
-            <div id="spin-result" style="margin-top:15px; font-size:1.5rem; color:#f1c40f;"></div>
+            <button id="spin-btn" class="big-btn">SPIN FOR A GIFT! 🎡</button>
         </div>
     </div>
 
     <div id="letter-stage">
-        <div id="envelope-sealed" onclick="openLetter()">
-            <div id="wax-seal">A</div>
+        <div id="envelope-sealed" style="width:280px; height:160px; background:#fdfaf0; border-radius:5px; display:flex; justify-content:center; align-items:center; border:1px solid #d4af37;">
+            <div id="wax-seal" style="width:60px; height:60px; background:#8a0c24; border-radius:50%; color:#ffd700; display:flex; justify-content:center; align-items:center; font-size:1.5rem;">A</div>
         </div>
         <div id="letter-open-container">
             <h2>To My Brother Ankith</h2>
-            <br>
-            <p>Happy Birthday, Legend!</p>
-            <p>I just wanted to take a moment to tell you how much you mean to me. Growing up with you has given me so many memories that I’ll always cherish. You’ve always been the fun one — the guy who can crack a joke in any situation and make everyone around you laugh. Honestly, half the time I think our family survives tough moments because of your humor.
-            <br><br>
-            I really admire the courage you’ve shown by trying to build a career in a new country. It’s not easy to step out of your comfort zone and chase something bigger, but that’s exactly what you’re doing. It takes strength, patience, and a lot of determination, and I’m proud of you for that.
-            <br><br>
-            I’m also grateful for everything you’ve done for our family, especially being there at home with mom and dad when I couldn’t be. Knowing you’re there looking out for them gives me a lot of peace of mind. It means more than I probably say.
-            <br><br>
-            Some of my favorite memories are the simple ones — the times we sit together, share a few drinks, talk about life, argue about random things, and laugh like idiots. Those moments remind me how lucky I am to have you not just as a brother, but as a friend.
-            <br><br>
-            I hope this year brings you success, happiness, good health, and many more reasons to laugh. No matter where life takes us, you’ll always be my brother and one of my favorite people to spend time with.
-            <br><br>
-            Enjoy your day, celebrate big.
-            <br><br>
-            Happy Birthday once again! 🎂🥂.</p>
-            <br>
-            <p style="font-style: italic;">With love, <br> Your Brother</p>
-            <button class="big-btn" style="display:block; margin: 40px auto; background: #ffd700; color: #8a0c24;" onclick="location.reload()">REPLAY THE SURPRISE</button>
+            <p>Happy Birthday, Legend!<br><br>
+               I hope this year brings you success, happiness, and good health. No matter where life takes us, you’ll always be my brother and my best friend.<br><br>
+               Celebrate big!<br><br>
+               <i>With love, Your Brother</i>
+            </p>
+            <button class="big-btn" onclick="location.reload()" style="background:#ffd700; color:#8a0c24;">REPLAY</button>
         </div>
     </div>
 
-    <audio id="birthdaySong" preload="auto" loop><source src="https://www.orangefreesounds.com/wp-content/uploads/2016/08/Happy-birthday-instrumental.mp3" type="audio/mpeg"></audio>
-    <audio id="popSound" preload="auto"><source src="https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3" type="audio/mpeg"></audio>
-    <audio id="cashSound" preload="auto"><source src="https://assets.mixkit.co/active_storage/sfx/2017/2017-preview.mp3" type="audio/mpeg"></audio>
-    <audio id="confettiSound" preload="auto"><source src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3" type="audio/mpeg"></audio>
-    <audio id="wheelSound" preload="auto" loop><source src="https://assets.mixkit.co/active_storage/sfx/2180/2180-preview.mp3" type="audio/mpeg"></audio>
-    <audio id="sealSound" preload="auto"><source src="https://assets.mixkit.co/active_storage/sfx/1101/1101-preview.mp3" type="audio/mpeg"></audio>
-    
     <script>
-        /* --- COUNTDOWN LOGIC --- */
-        let testClicks = 0;
-        function updateCountdown() {
-            const now = new Date().toLocaleString("en-US", {timeZone: "America/New_York"});
-            const currentTime = new Date(now);
-            const targetDate = new Date("March 18, 2026 00:00:00");
-            const diff = targetDate - currentTime;
+        // Use a single "Unmute" logic to handle iOS/Safari audio restrictions
+        const audios = {
+            song: new Audio("https://www.orangefreesounds.com/wp-content/uploads/2016/08/Happy-birthday-instrumental.mp3"),
+            pop: new Audio("https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3"),
+            cash: new Audio("https://assets.mixkit.co/active_storage/sfx/2017/2017-preview.mp3"),
+            wheel: new Audio("https://assets.mixkit.co/active_storage/sfx/2180/2180-preview.mp3")
+        };
+        audios.song.loop = true;
 
-            if (diff <= 0) {
+        let interactionCount = 0;
+        const lockBtn = document.getElementById('lock-btn');
+        const lightSwitch = document.getElementById('light-switch');
+
+        // Unlock logic
+        lockBtn.addEventListener('click', () => {
+            interactionCount++;
+            if (interactionCount >= 5) {
                 document.getElementById('countdown-overlay').style.display = 'none';
-                document.getElementById('light-switch').style.display = 'block';
-                return;
+                lightSwitch.style.display = 'block';
             }
+        });
 
-            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const s = Math.floor((diff % (1000 * 60)) / 1000);
+        // Stage 1: Reveal
+        lightSwitch.addEventListener('click', () => {
+            // "Prime" all audio for iOS on first real click
+            Object.values(audios).forEach(a => { a.play(); a.pause(); a.currentTime = 0; });
+            audios.song.play();
+            
+            lightSwitch.style.display = 'none';
+            document.getElementById('leds').style.display = 'flex';
+            const banner = document.getElementById('banner-wrapper');
+            banner.style.display = 'flex';
+            setTimeout(() => { banner.style.opacity = '1'; banner.style.transform = 'translateY(0)'; }, 50);
+            
+            setTimeout(() => {
+                const cake = document.getElementById('cake-container');
+                cake.style.display = 'block';
+                setTimeout(() => cake.style.opacity = '1', 50);
+                drawCake();
+            }, 3000);
+        });
 
-            document.getElementById('timer').innerText = 
-                `${String(d).padStart(2, '0')}:${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-        }
-        setInterval(updateCountdown, 1000);
-        updateCountdown();
-
-        function testModeTrigger() {
-            testClicks++;
-            if (testClicks >= 5) {
-                document.getElementById('countdown-overlay').style.display = 'none';
-                document.getElementById('light-switch').style.display = 'block';
-            }
-        }
-
-        /* --- GAME LOGIC --- */
+        // Stage 2: Cake Canvas
         const canvas = document.getElementById('cakeCanvas');
         const ctx = canvas.getContext('2d');
-        const song = document.getElementById('birthdaySong');
-        const popSound = document.getElementById('popSound');
-        const cashSound = document.getElementById('cashSound');
-        const confettiSound = document.getElementById('confettiSound');
-        const wheelSound = document.getElementById('wheelSound');
-        const sealSound = document.getElementById('sealSound');
-        const hint = document.getElementById('hint');
-        const glowingAnkith = document.getElementById('glowing-ankith');
-        const navBtn = document.getElementById('nav-button');
-        
-        let candleLit = false, cakeCut = false, sliceSeparated = false;
-        let isBillPaid = false, finishedRiddles = false;
+        let candleLit = false, cakeCut = false;
 
         function drawCake() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "#ddd"; ctx.beginPath(); ctx.ellipse(200, 280, 140, 30, 0, 0, Math.PI * 2); ctx.fill();
+            // Base
             ctx.fillStyle = "#3498db"; ctx.fillRect(100, 200, 200, 70);
             ctx.fillStyle = "#e91e63"; ctx.fillRect(120, 150, 160, 50);
-            if (sliceSeparated) {
-                ctx.save(); ctx.beginPath(); ctx.moveTo(140, 150); ctx.lineTo(260, 150); ctx.lineTo(260, 110);
-                ctx.lineTo(195, 110); ctx.lineTo(200, 130); ctx.lineTo(165, 110); ctx.lineTo(140, 110); ctx.closePath(); ctx.clip(); 
-                ctx.fillStyle = "#f1c40f"; ctx.fillRect(140, 110, 120, 40); ctx.fillStyle = "white"; ctx.fillRect(140, 110, 120, 10); ctx.restore();
-                drawTriangularSlice(70, 120);
-            } else { ctx.fillStyle = "#f1c40f"; ctx.fillRect(140, 110, 120, 40); ctx.fillStyle = "white"; ctx.fillRect(140, 110, 120, 10); }
-            ctx.fillStyle = "#fff"; ctx.fillRect(215, 75, 8, 35); 
+            ctx.fillStyle = "#f1c40f"; ctx.fillRect(140, 110, 120, 40);
+            // Candle
+            ctx.fillStyle = "#fff"; ctx.fillRect(195, 75, 10, 35);
             if (candleLit) {
-                ctx.shadowBlur = 15; ctx.shadowColor = "orange"; ctx.fillStyle = "#ff9800";
-                ctx.beginPath(); ctx.moveTo(219, 50); ctx.quadraticCurveTo(227, 65, 219, 75); ctx.quadraticCurveTo(211, 65, 219, 50); ctx.fill(); ctx.shadowBlur = 0;
+                ctx.fillStyle = "orange";
+                ctx.beginPath(); ctx.arc(200, 65, 8, 0, Math.PI*2); ctx.fill();
             }
         }
 
-        function drawTriangularSlice(x, y) {
-            ctx.save(); ctx.translate(x, y); ctx.rotate(-0.15); 
-            ctx.fillStyle = "#f1c40f"; ctx.beginPath(); ctx.moveTo(0, 30); ctx.lineTo(30, -10); ctx.lineTo(60, 30); ctx.fill(); ctx.restore();
-        }
-
-        function revealSurprise() {
-            song.play();
-            document.getElementById('light-switch').style.display = 'none';
-            document.getElementById('leds').style.display = 'flex';
-            const banner = document.getElementById('banner-wrapper'); banner.style.display = 'flex';
-            setTimeout(() => { banner.style.opacity = '1'; banner.style.transform = 'translateY(0)'; }, 100);
-            setTimeout(() => { document.getElementById('cake-container').style.display = 'block'; setTimeout(() => document.getElementById('cake-container').style.opacity = '1', 50); drawCake(); }, 4000);
-        }
-
-        canvas.addEventListener('mousedown', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left, y = e.clientY - rect.top;
-            if (!candleLit && x > 200 && x < 235 && y > 40 && y < 110) { candleLit = true; hint.innerText = "SWIPE THE CAKE TO CUT IT!"; drawCake(); }
-            else if (candleLit && !cakeCut) { cakeCut = true; sliceSeparated = true; drawCake(); hint.style.display = "none"; glowingAnkith.style.display = 'block'; setTimeout(() => { glowingAnkith.style.opacity = '1'; navBtn.style.display = 'inline-block'; }, 50); }
+        canvas.addEventListener('pointerdown', (e) => {
+            if (!candleLit) {
+                candleLit = true;
+                document.getElementById('hint').innerText = "TAP AGAIN TO CUT THE CAKE!";
+                drawCake();
+            } else if (!cakeCut) {
+                cakeCut = true;
+                document.getElementById('hint').style.display = 'none';
+                document.getElementById('glowing-ankith').style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById('glowing-ankith').style.opacity = '1';
+                }, 50);
+            }
         });
 
-        function startBalloonSky() {
-            song.pause(); song.currentTime = 0;
+        // Stage 3: Balloons
+        document.getElementById('nav-button').addEventListener('click', () => {
             document.getElementById('cake-container').style.display = 'none';
             document.body.classList.add('sky-active');
-            for(let i=0; i < 25; i++) {
+            for(let i=0; i<15; i++) {
                 setTimeout(() => {
-                    const b = document.createElement('div'); b.className = 'balloon';
-                    b.style.backgroundColor = ['#ff007f','#00f2ff','#f1c40f','#e91e63','#9b59b6'][i%5];
-                    b.style.left = Math.random() * 90 + '%';
-                    const popHandler = (e) => { e.stopPropagation(); popSound.currentTime = 0; popSound.play(); b.remove(); };
-                    b.addEventListener('mousedown', popHandler); b.addEventListener('touchstart', popHandler);
+                    const b = document.createElement('div');
+                    b.className = 'balloon';
+                    b.style.left = Math.random() * 80 + 10 + '%';
+                    b.style.backgroundColor = ['#ff007f','#00f2ff','#f1c40f'][i%3];
+                    b.addEventListener('pointerdown', () => { audios.pop.play(); b.remove(); });
                     document.body.appendChild(b);
-                    setTimeout(() => { if(b.parentNode) b.remove(); }, 12000);
-                }, i * 350);
+                }, i * 400);
             }
-            setTimeout(initPhotoStack, 7000);
-        }
+            setTimeout(initPhotoStack, 6000);
+        });
 
+        // Stage 4: Photos & Tax
         function initPhotoStack() {
-            const stack = document.getElementById('photo-stack'); stack.style.display = 'block'; setTimeout(() => stack.style.opacity = '1', 50);
-            const photos = [
-                { url: 'https://raw.githubusercontent.com/akhilbevara/Bithday/main/photos/1.jpg', label: 'Memories' },
-                { url: 'https://raw.githubusercontent.com/akhilbevara/Bithday/main/photos/2.jpg', label: 'Dreams' },
-                { url: 'https://raw.githubusercontent.com/akhilbevara/Bithday/main/photos/WhatsApp%20Image%202026-03-17%20at%201.30.08%20AM.jpeg', label: 'The Legend' },
-                { url: 'https://raw.githubusercontent.com/akhilbevara/Bithday/main/photos/WhatsApp%20Image%202026-03-17%20at%201.30.09%20AM.jpeg', label: 'Brotherhood' },
-                { url: 'https://raw.githubusercontent.com/akhilbevara/Bithday/main/photos/WhatsApp%20Image%202026-03-17%20at%201.31.49%20AM.jpeg', label: 'Birthday Boy!' }
+            const stack = document.getElementById('photo-stack');
+            stack.style.display = 'block';
+            setTimeout(() => stack.style.opacity = '1', 50);
+            
+            const urls = [
+                'https://raw.githubusercontent.com/akhilbevara/Bithday/main/photos/1.jpg',
+                'https://raw.githubusercontent.com/akhilbevara/Bithday/main/photos/2.jpg'
             ];
-            let swiped = 0;
-            photos.forEach((p, i) => {
-                const card = document.createElement('div'); card.className = 'card'; card.style.zIndex = photos.length - i;
-                card.style.transform = `rotate(${(Math.random() * 6) - 3}deg)`;
-                card.innerHTML = `<img src="${p.url}"><div class="card-label">${p.label}</div>`;
-                card.onmousedown = (e) => {
-                    let startX = e.clientX;
-                    document.onmousemove = (e) => { let moveX = e.clientX - startX; card.style.transform = `translateX(${moveX}px) rotate(${moveX/10}deg)`; };
-                    document.onmouseup = (e) => {
-                        document.onmousemove = null; let moveX = e.clientX - startX;
-                        if (Math.abs(moveX) > 100) {
-                            card.style.transform = `translateX(${moveX > 0 ? 1000 : -1000}px)`; card.style.opacity = '0';
-                            setTimeout(() => { card.remove(); swiped++; if(swiped === photos.length) { document.getElementById('brother-invoice').style.display = 'block'; document.getElementById('start-hunt-btn').style.display = 'block'; }}, 400);
-                        } else card.style.transform = `translateX(0) rotate(0deg)`;
-                    };
-                };
+
+            urls.forEach((url, i) => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `<img src="${url}">`;
+                card.style.zIndex = 10 - i;
+                
+                card.addEventListener('pointerdown', (e) => {
+                    card.style.transform = "translateX(500px) rotate(20deg)";
+                    card.style.opacity = "0";
+                    setTimeout(() => {
+                        card.remove();
+                        if (document.querySelectorAll('.card').length === 0) {
+                            document.getElementById('brother-invoice').style.display = 'block';
+                            document.getElementById('start-hunt-btn').style.display = 'block';
+                        }
+                    }, 500);
+                });
                 stack.appendChild(card);
             });
         }
 
-        function settleDebt() { 
-            isBillPaid = true; 
-            cashSound.currentTime = 0; cashSound.play();
-            const btn = document.getElementById('stamp-btn'); 
-            btn.innerText = "PAID IN FULL ✓"; btn.style.background = "#27ae60"; 
-            document.getElementById('debt-warning').style.display = 'none'; 
-            if(finishedRiddles) document.getElementById('return-to-wheel-btn').style.display = 'block'; 
-        }
+        let isPaid = false;
+        document.getElementById('stamp-btn').addEventListener('click', function() {
+            isPaid = true;
+            audios.cash.play();
+            this.innerText = "PAID ✓";
+            this.style.background = "#27ae60";
+        });
 
-        function triggerConfetti() {
-            confettiSound.currentTime = 0; confettiSound.play();
-            for (let i = 0; i < 50; i++) {
-                const confetti = document.createElement('div');
-                confetti.className = 'confetti-piece';
-                confetti.style.left = Math.random() * 100 + 'vw';
-                confetti.style.backgroundColor = ['#ff007f','#00f2ff','#f1c40f','#e91e63','#ffffff'][Math.floor(Math.random()*5)];
-                confetti.style.width = Math.random() * 10 + 5 + 'px';
-                confetti.style.height = Math.random() * 15 + 5 + 'px';
-                confetti.style.animationDelay = Math.random() * 0.5 + 's';
-                document.body.appendChild(confetti);
-                setTimeout(() => confetti.remove(), 3000);
-            }
-        }
+        // Stage 5: Hunt
+        const riddles = [
+            { q: "What breakfast superstar did I declare war on as a kid?", a: "egg" },
+            { q: "A bowl of something hot defeated me as a child. What was it?", a: "lentils" }
+        ];
+        let curRiddle = 0;
 
-        function goToTaxFromWheel() { document.getElementById('hunt-container').style.display = 'none'; document.getElementById('brother-invoice').style.display = 'block'; }
-        function returnToWheel() { document.getElementById('brother-invoice').style.display = 'none'; document.getElementById('hunt-container').style.display = 'flex'; document.getElementById('final-section').style.display = 'flex'; }
-        
-        const riddles = [{ q: "As a child, I didn’t need enemies. A bowl of something hot defeated me. What was it?", a: "lentils" }, { q: "What was my second job as a kid during the night?", a: "cricket commentary" }, { q: "What breakfast superstar did I declared war on as a kid?", a: "egg" }];
-        let currRiddle = 0;
-        function openHunt() { document.getElementById('start-hunt-btn').style.display = 'none'; document.getElementById('photo-stack').style.display = 'none'; document.getElementById('brother-invoice').style.display = 'none'; document.getElementById('hunt-container').style.display = 'flex'; document.getElementById('hunt-riddle').innerText = riddles[0].q; }
-        
-        function checkAnswer() {
-            const input = document.getElementById('hunt-input').value.toLowerCase();
-            if (input.includes(riddles[currRiddle].a)) {
-                triggerConfetti();
-                currRiddle++; 
-                document.getElementById('hunt-input').value = "";
-                if (currRiddle < riddles.length) { 
-                    document.getElementById('hunt-title').innerText = `Riddle #${currRiddle + 1}`; 
-                    document.getElementById('hunt-riddle').innerText = riddles[currRiddle].q; 
-                }
-                else { 
-                    finishedRiddles = true; 
-                    document.getElementById('hunt-box').style.display = 'none'; 
-                    document.getElementById('final-section').style.display = 'flex'; 
-                    if(!isBillPaid) { 
-                        document.getElementById('debt-warning').style.display = 'block'; 
-                        document.getElementById('go-back-tax-btn').style.display = 'block'; 
-                    } initWheel(); 
+        document.getElementById('start-hunt-btn').addEventListener('click', () => {
+            document.getElementById('photo-stack').style.display = 'none';
+            document.getElementById('brother-invoice').style.display = 'none';
+            document.getElementById('start-hunt-btn').style.display = 'none';
+            document.getElementById('hunt-container').style.display = 'flex';
+            document.getElementById('hunt-riddle').innerText = riddles[0].q;
+        });
+
+        document.getElementById('hunt-submit').addEventListener('click', () => {
+            const val = document.getElementById('hunt-input').value.toLowerCase();
+            if (val.includes(riddles[curRiddle].a)) {
+                curRiddle++;
+                if (curRiddle < riddles.length) {
+                    document.getElementById('hunt-title').innerText = `Riddle #${curRiddle+1}`;
+                    document.getElementById('hunt-riddle').innerText = riddles[curRiddle].q;
+                    document.getElementById('hunt-input').value = "";
+                } else {
+                    document.getElementById('hunt-box').style.display = 'none';
+                    document.getElementById('final-section').style.display = 'flex';
+                    initWheel();
                 }
             }
-        }
+        });
 
-        const prizes = ["Movie Night", "Amazon Voucher", "Cheat Meal", "Mystery Gift", "New T-Shirt", "A Big Hug"];
+        // Wheel Logic
         function initWheel() {
-            const wCanvas = document.getElementById('wheel'), wCtx = wCanvas.getContext('2d'), angle = 2 * Math.PI / prizes.length;
-            for (let i = 0; i < prizes.length; i++) {
-                wCtx.beginPath(); wCtx.moveTo(150, 150); wCtx.arc(150, 150, 150, i * angle, (i + 1) * angle);
-                wCtx.fillStyle = i % 2 === 0 ? "#ff007f" : "#00f2ff"; wCtx.fill();
-                wCtx.save(); wCtx.translate(150, 150); wCtx.rotate(i * angle + angle / 2);
-                wCtx.fillStyle = "white"; wCtx.font = "bold 14px sans-serif"; wCtx.fillText(prizes[i], 50, 5); wCtx.restore();
+            const wCanvas = document.getElementById('wheel');
+            const wCtx = wCanvas.getContext('2d');
+            const p = ["Gift", "Meal", "Hug", "Cash", "Movie", "T-Shirt"];
+            for(let i=0; i<6; i++) {
+                wCtx.beginPath(); wCtx.moveTo(150,150);
+                wCtx.arc(150,150,150, i*(Math.PI/3), (i+1)*(Math.PI/3));
+                wCtx.fillStyle = i%2===0 ? "#ff007f" : "#00f2ff";
+                wCtx.fill();
             }
         }
 
-        function spinWheel() {
-            if (!isBillPaid) return;
-            const btn = document.getElementById('spin-btn'); 
-            btn.disabled = true; btn.style.opacity = '0.5';
-            wheelSound.currentTime = 0; wheelSound.play();
-            const randomRotation = 1440 + Math.floor(Math.random() * 360);
-            document.getElementById('wheel').style.transform = `rotate(${randomRotation}deg)`;
-            
+        document.getElementById('spin-btn').addEventListener('click', function() {
+            if(!isPaid) { alert("Pay the Brother Tax first! Click the red Stamp button."); return; }
+            audios.wheel.play();
+            const rot = 1440 + Math.random() * 360;
+            document.getElementById('wheel').style.transform = `rotate(${rot}deg)`;
             setTimeout(() => {
-                wheelSound.pause(); wheelSound.currentTime = 0;
-                const prizeIndex = Math.floor(((360 - (randomRotation % 360) + 270) % 360) / (360 / prizes.length));
-                document.getElementById('spin-result').innerText = `🎁 YOU WON: ${prizes[prizeIndex]}!`;
-                triggerConfetti();
-                btn.innerText = "VIEW GREETING 💌";
-                btn.disabled = false; btn.style.opacity = '1';
-                btn.style.background = "linear-gradient(45deg, #d4af37, #8a0c24)";
-                btn.onclick = showLetter;
+                audios.wheel.pause();
+                this.innerText = "OPEN LETTER 💌";
+                this.onclick = () => {
+                    document.getElementById('hunt-container').style.display = 'none';
+                    document.getElementById('letter-stage').style.display = 'flex';
+                };
             }, 4000);
-        }
+        });
 
-        function showLetter() {
-            document.getElementById('hunt-container').style.display = 'none';
-            document.getElementById('letter-stage').style.display = 'flex';
-        }
+        document.getElementById('envelope-sealed').addEventListener('click', () => {
+            document.getElementById('envelope-sealed').style.display = 'none';
+            document.getElementById('letter-open-container').style.display = 'block';
+        });
 
-        function openLetter() {
-            sealSound.play();
-            document.getElementById('envelope-sealed').style.transform = "scale(0) rotateY(180deg)";
-            setTimeout(() => {
-                document.getElementById('envelope-sealed').style.display = "none";
-                document.getElementById('letter-open-container').style.display = "block";
-            }, 600);
+        // Countdown Timer
+        function updateTimer() {
+            const target = new Date("March 18, 2026 00:00:00").getTime();
+            const now = new Date().getTime();
+            const diff = target - now;
+            if (diff < 0) {
+                document.getElementById('timer').innerText = "00:00:00:00";
+                return;
+            }
+            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((diff % (1000 * 60)) / 1000);
+            document.getElementById('timer').innerText = `${d}:${h}:${m}:${s}`;
         }
+        setInterval(updateTimer, 1000);
     </script>
 </body>
 </html>
